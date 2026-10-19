@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Фокус-Спутник | ЕГЭ & Duolingo </title>
+  <title>Фокус-Спутник | ЕГЭ & Duolingo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,7 +185,7 @@
 
         <div class="z-10 mb-4 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
           <label for="topic-input" class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-            <span>🎯</span> Тема вебинара или вопрос:
+            <span>🎯</span> Тема вебинара:
           </label>
           <input type="text" id="topic-input" 
             placeholder="Например: Биология — Митоз и Мейоз" 
@@ -315,7 +315,7 @@
   <div id="summary-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-cardDark border border-borderDark rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
       <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-        <span>🎉</span> Отличная работа, исследовательница!
+        <span>🎉</span> Отличная работа, исследователь_ница!
       </h3>
       <p class="text-xs text-slate-300 mb-4 leading-relaxed">
         Вот сводка твоих успехов за текущую учебную сессию:
@@ -341,7 +341,7 @@
       </div>
 
       <div class="p-3 bg-purple-950/40 border border-purple-500/30 rounded-xl text-xs text-purple-200 mb-5 italic" id="modal-encouragement">
-        «Помни: главное — это регулярность и маленькие шаги. 15-20 минут фокуса лучше, чем 3 часа сидеть в тик-токе с чувством вины!»
+        «Помни: главное — это регулярность и маленькие шаги. 15-20 минут фокуса лучше, чем часы прокрастинации с чувством вины!»
       </div>
 
       <div class="flex gap-2">
@@ -361,6 +361,7 @@
       breakDurationMinutes: 5,
       currentPhase: 'study',
       timeRemainingSeconds: 20 * 60,
+      targetEndTime: null,
       isRunning: false,
       sprintsToday: 0,
       breakCountToday: 0,
@@ -405,7 +406,6 @@
       }
     }
 
-    /* Web Audio initialization */
     function initAudioContext() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -416,14 +416,12 @@
       }
     }
 
-    /* Request system notification permissions */
     function requestPushPermission() {
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
       }
     }
 
-    /* Send system Push Notification and device vibration */
     function sendPushNotification(title, message) {
       if ("vibrate" in navigator) {
         try {
@@ -615,19 +613,27 @@
       if (appState.isRunning) {
         clearInterval(timerInterval);
         appState.isRunning = false;
+        appState.targetEndTime = null;
       } else {
         appState.isRunning = true;
-        timerInterval = setInterval(tick, 1000);
+        appState.targetEndTime = Date.now() + (appState.timeRemainingSeconds * 1000);
+        timerInterval = setInterval(tick, 500);
       }
       saveState();
       updateTimerUI();
     }
 
     function tick() {
-      if (appState.timeRemainingSeconds > 0) {
-        appState.timeRemainingSeconds--;
+      if (!appState.isRunning || !appState.targetEndTime) return;
+
+      const now = Date.now();
+      const diffMs = appState.targetEndTime - now;
+
+      if (diffMs > 0) {
+        appState.timeRemainingSeconds = Math.ceil(diffMs / 1000);
         updateTimerUI();
       } else {
+        appState.timeRemainingSeconds = 0;
         handlePhaseCompletion();
       }
     }
@@ -635,6 +641,7 @@
     function handlePhaseCompletion() {
       clearInterval(timerInterval);
       appState.isRunning = false;
+      appState.targetEndTime = null;
 
       if (appState.currentPhase === 'study') {
         playChimeStudyDone();
@@ -659,6 +666,8 @@
       requestPushPermission();
       clearInterval(timerInterval);
       appState.isRunning = false;
+      appState.targetEndTime = null;
+
       if (appState.currentPhase === 'study') {
         appState.currentPhase = 'break';
         appState.timeRemainingSeconds = appState.breakDurationMinutes * 60;
@@ -673,6 +682,7 @@
     function resetTimer() {
       clearInterval(timerInterval);
       appState.isRunning = false;
+      appState.targetEndTime = null;
       const baseMinutes = (appState.currentPhase === 'study') ? appState.studyDurationMinutes : appState.breakDurationMinutes;
       appState.timeRemainingSeconds = baseMinutes * 60;
       saveState();
@@ -694,6 +704,7 @@
 
       if (appState.currentPhase === 'study' && !appState.isRunning) {
         appState.timeRemainingSeconds = minutes * 60;
+        appState.targetEndTime = null;
       }
       saveState();
       updateTimerUI();
@@ -825,6 +836,12 @@
         updateTimerUI();
       }
     }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && appState.isRunning) {
+        tick();
+      }
+    });
 
     window.onload = function() {
       const topicInput = document.getElementById('topic-input');
