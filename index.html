@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Фокус-Спутник | ЕГЭ & Duolingo </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            bgDark: '#0B0F19',
+            cardDark: '#131A2B',
+            borderDark: '#212D45',
+            neonViolet: '#8B5CF6',
+            neonCyan: '#06B6D4',
+            neonEmerald: '#10B981',
+            duoGreen: '#58CC02',
+            duoYellow: '#FFC800'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes petFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(1.5deg); }
+    }
+    @keyframes petStudy {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.02, 0.98) translateY(2px); }
+    }
+    @keyframes petDance {
+      0%, 100% { transform: rotate(-5deg) translateY(-4px) scale(1.05); }
+      50% { transform: rotate(5deg) translateY(4px) scale(1.08); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.12); }
+    }
+
+    .animate-float { animation: petFloat 4s ease-in-out infinite; }
+    .animate-study { animation: petStudy 2.4s ease-in-out infinite; }
+    .animate-dance { animation: petDance 0.75s ease-in-out infinite; }
+    .glow-aura { animation: pulseGlow 3s ease-in-out infinite; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #212d45; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="bg-[#0B0F19] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-purple-500/30">
+
+  <header class="border-b border-borderDark/80 bg-cardDark/40 backdrop-blur sticky top-0 z-30 px-4 py-3 sm:px-8">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-xl shadow-lg shadow-purple-500/20">
+          🎓
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg tracking-tight bg-gradient-to-r from-purple-200 via-white to-purple-400 bg-clip-text text-transparent">
+            ЕГЭ Напарница &middot; Спринты
+          </h1>
+          <p class="text-xs text-slate-400">Telegram Вебинары &harr; Дуэли с Оскаром</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-1.5 shadow-inner">
+        <span class="text-xs uppercase tracking-wider font-semibold text-purple-400">Дедлайн блока:</span>
+        <span class="text-xs font-bold text-white bg-purple-900/50 px-2 py-0.5 rounded-md border border-purple-500/30">12 ноября</span>
+        <span id="header-days-left" class="text-xs text-cyan-300 font-medium ml-1">... дн.</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <section class="lg:col-span-7 flex flex-col gap-6">
+      <div class="bg-cardDark/80 border border-borderDark rounded-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+        
+        <div class="flex items-center justify-between z-10">
+          <div class="flex items-center gap-2">
+            <span id="phase-badge" class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
+              Фокус: Вебинар
+            </span>
+            <span class="text-xs text-slate-400 hidden sm:inline" id="phase-subtext">Смотрим блок в Telegram</span>
+          </div>
+
+          <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
+            <button id="btn-mode-20" onclick="setStudyDuration(20)" class="px-2.5 py-1 rounded-lg font-medium transition bg-purple-600 text-white shadow">20 мин</button>
+            <button id="btn-mode-15" onclick="setStudyDuration(15)" class="px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition">15 мин</button>
+          </div>
+        </div>
+
+        <div class="my-6 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 z-10">
+          
+          <div class="relative flex flex-col items-center">
+            <div id="pet-glow" class="absolute w-36 h-36 rounded-full bg-purple-600/20 blur-2xl glow-aura"></div>
+            
+            <div id="pet-container" class="w-36 h-36 relative flex items-center justify-center transition-all duration-500 animate-float">
+              <svg id="pet-svg" viewBox="0 0 160 160" class="w-36 h-36 filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)]">
+                <defs>
+                  <linearGradient id="bodyGradStudy" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#A78BFA"/>
+                    <stop offset="100%" stop-color="#6D28D9"/>
+                  </linearGradient>
+                  <linearGradient id="bodyGradBreak" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#34D399"/>
+                    <stop offset="100%" stop-color="#059669"/>
+                  </linearGradient>
+                </defs>
+
+                <path d="M 45 60 C 35 25, 60 20, 68 50 Z" fill="#6D28D9" id="ear-l"/>
+                <path d="M 115 60 C 125 25, 100 20, 92 50 Z" fill="#6D28D9" id="ear-r"/>
+                <path d="M 49 55 C 42 35, 58 32, 63 50 Z" fill="#F472B6"/>
+                <path d="M 111 55 C 118 35, 102 32, 97 50 Z" fill="#F472B6"/>
+
+                <circle id="pet-body" cx="80" cy="88" r="54" fill="url(#bodyGradStudy)" class="transition-all duration-700"/>
+                
+                <circle cx="52" cy="98" r="7" fill="#F472B6" opacity="0.6"/>
+                <circle cx="108" cy="98" r="7" fill="#F472B6" opacity="0.6"/>
+
+                <g id="pet-eyes">
+                  <circle cx="58" cy="85" r="7" fill="#0B0F19"/>
+                  <circle cx="102" cy="85" r="7" fill="#0B0F19"/>
+                  <circle cx="60" cy="82" r="2.5" fill="#FFFFFF"/>
+                  <circle cx="104" cy="82" r="2.5" fill="#FFFFFF"/>
+                </g>
+
+                <path id="pet-mouth" d="M 74 97 Q 80 103 86 97" stroke="#0B0F19" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+                <g id="pet-glasses" class="opacity-100 transition-opacity duration-300">
+                  <circle cx="58" cy="85" r="13" stroke="#F59E0B" stroke-width="3" fill="rgba(255,255,255,0.08)"/>
+                  <circle cx="102" cy="85" r="13" stroke="#F59E0B" stroke-width="3" fill="rgba(255,255,255,0.08)"/>
+                  <line x1="71" y1="85" x2="89" y2="85" stroke="#F59E0B" stroke-width="3.5"/>
+                </g>
+
+                <g id="pet-party-hat" class="opacity-0 transition-opacity duration-300">
+                  <polygon points="80,18 64,50 96,50" fill="#FFC800" stroke="#B45309" stroke-width="2"/>
+                  <circle cx="80" cy="18" r="4.5" fill="#EF4444"/>
+                  <circle cx="80" cy="36" r="3" fill="#FFFFFF"/>
+                </g>
+              </svg>
+            </div>
+
+            <div id="pet-dialog" class="mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-purple-200 shadow-md text-center max-w-[170px]">
+              «Включай Telegram, я на страже фокуса!»
+            </div>
+          </div>
+
+          <div class="relative w-48 h-48 sm:w-52 sm:h-52 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" stroke="#1E293B" stroke-width="7" fill="none"/>
+              <circle id="timer-progress-ring" cx="60" cy="60" r="52" 
+                stroke="#8B5CF6" 
+                stroke-width="7" 
+                stroke-linecap="round" 
+                fill="none" 
+                stroke-dasharray="326.72" 
+                stroke-dashoffset="0"
+                class="transition-all duration-300"/>
+            </svg>
+
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span id="timer-display" class="font-extrabold text-4xl sm:text-5xl tracking-tight text-white font-mono drop-shadow">
+                20:00
+              </span>
+              <span id="timer-status-label" class="text-xs uppercase tracking-wider text-purple-300 font-semibold mt-1">
+                Фокус
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="z-10 mb-4 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+          <label for="topic-input" class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
+            <span>🎯</span> Тема вебинара или вопрос:
+          </label>
+          <input type="text" id="topic-input" 
+            placeholder="Например: Биология — Митоз и Мейоз" 
+            class="w-full bg-slate-950/70 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"/>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 z-10">
+          <button id="btn-toggle" onclick="toggleTimer()" class="flex-1 min-w-[140px] py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-98 transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2">
+            <span id="btn-toggle-icon">▶</span>
+            <span id="btn-toggle-text">Начать спринт</span>
+          </button>
+          
+          <button onclick="skipPhase()" title="Перейти к следующей фазе" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 active:scale-95 transition">
+            ⏭️
+          </button>
+
+          <button onclick="resetTimer()" title="Сбросить текущий таймер" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 active:scale-95 transition">
+            🔄
+          </button>
+        </div>
+
+        <div id="duo-callout" class="mt-4 p-3 bg-gradient-to-r from-emerald-950/50 to-emerald-900/40 border border-emerald-500/40 rounded-xl flex items-center justify-between transition-all duration-300 hidden z-10">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#58CC02] flex items-center justify-center text-xl shadow">
+              🦉
+            </div>
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-emerald-300">Партия с Оскаром ждёт!</p>
+              <p class="text-xs text-slate-300">5 минут перезагрузки</p>
+            </div>
+          </div>
+          <a href="https://www.duolingo.com" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-lg bg-[#58CC02] hover:bg-[#46a302] text-slate-950 font-bold text-xs uppercase tracking-wide transition shadow-md flex items-center gap-1.5">
+            Открыть Duolingo &rarr;
+          </a>
+        </div>
+
+      </div>
+
+      <div class="bg-cardDark/80 border border-borderDark rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl shadow-inner">
+            🔥
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-slate-200">Сегодняшняя серия</h4>
+            <p class="text-xs text-slate-400">1 спринт – 15-20 минут вебинара</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="text-2xl font-black text-amber-400" id="sprints-today-count">0</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wider">спринтов закрыто</div>
+          </div>
+          <div class="h-8 w-px bg-slate-800"></div>
+          <div class="text-right">
+            <div class="text-2xl font-black text-cyan-400" id="minutes-today-count">0</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wider">минут учебы</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="lg:col-span-5 flex flex-col gap-6">
+
+      <div class="bg-gradient-to-br from-indigo-950/40 via-cardDark to-cardDark border border-purple-500/30 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="text-xs uppercase tracking-wider font-bold text-purple-400">План до 12 ноября</span>
+            <h3 class="text-lg font-extrabold text-white">Дневная норма</h3>
+          </div>
+          <span class="text-2xl">⏳</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+          Осталось дней: <strong id="calc-days" class="text-white font-bold">--</strong>. 
+          Нужно посмотреть: <strong id="calc-total-left" class="text-amber-300 font-bold">56</strong> из 56 вебинаров.
+        </p>
+
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+          <div class="text-xs text-slate-400">
+            Рекомендуемый темп:
+          </div>
+          <div class="text-right">
+            <span id="calc-daily-target" class="text-base font-black text-cyan-300">~2.0</span>
+            <span class="text-xs text-slate-400 font-medium">вебинара в день</span>
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-400 mt-2 italic text-center">
+          (Это примерно 4–6 спринтов по 15-20 минут в день с перерывами)
+        </div>
+      </div>
+
+      <div class="bg-cardDark/80 border border-borderDark rounded-2xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <span>📚</span> Вебинары по предметам
+            </h3>
+            <span class="text-xs text-slate-400 font-mono" id="overall-fraction">0 / 56</span>
+          </div>
+
+          <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden mb-5 border border-slate-800">
+            <div id="overall-progress-bar" class="bg-gradient-to-r from-purple-500 via-indigo-400 to-emerald-400 h-full w-0 transition-all duration-500"></div>
+          </div>
+
+          <div id="subjects-container" class="space-y-3.5">
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <button onclick="openDaySummaryModal()" class="text-purple-300 hover:text-purple-200 font-semibold underline underline-offset-4 decoration-purple-500/40">
+            📊 Итоги сессии
+          </button>
+          <button onclick="confirmResetAll()" class="text-slate-500 hover:text-rose-400 transition">
+            Сброс данных
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="summary-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-cardDark border border-borderDark rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+        <span>🎉</span> Отличная работа, исследовательница!
+      </h3>
+      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Вот сводка твоих успехов за текущую учебную сессию:
+      </p>
+
+      <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 space-y-2.5 text-sm mb-5">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Закрыто спринтов (по 15-20 мин):</span>
+          <span class="font-bold text-amber-400" id="modal-sprints">0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Чистое время лекций:</span>
+          <span class="font-bold text-cyan-400" id="modal-minutes">0 мин</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Партий с Оскаром в Duolingo:</span>
+          <span class="font-bold text-emerald-400" id="modal-duo">0</span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-slate-800">
+          <span class="text-slate-400">Всего вебинаров просмотрено:</span>
+          <span class="font-bold text-purple-300" id="modal-total-webinars">0 / 56</span>
+        </div>
+      </div>
+
+      <div class="p-3 bg-purple-950/40 border border-purple-500/30 rounded-xl text-xs text-purple-200 mb-5 italic" id="modal-encouragement">
+        «Помни: главное — это регулярность и маленькие шаги. 15-20 минут фокуса лучше, чем 3 часа прокрастинации с чувством вины!»
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="closeDaySummaryModal()" class="w-full py-2.5 rounded-xl font-bold bg-purple-600 hover:bg-purple-500 text-white transition">
+          Продолжить в своем темпе
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ege_companion_state_v1';
+    const DEADLINE_DATE = new Date('2026-11-12T23:59:59');
+
+    const INITIAL_STATE = {
+      studyDurationMinutes: 20,
+      breakDurationMinutes: 5,
+      currentPhase: 'study',
+      timeRemainingSeconds: 20 * 60,
+      isRunning: false,
+      sprintsToday: 0,
+      breakCountToday: 0,
+      lastActiveDate: new Date().toISOString().slice(0, 10),
+      currentTopic: '',
+      subjects: [
+        { id: 'bio', name: 'Биология', icon: '🧬', color: 'emerald', total: 14, watched: 0 },
+        { id: 'chem', name: 'Химия', icon: '🧪', color: 'cyan', total: 14, watched: 0 },
+        { id: 'rus', name: 'Русский язык', icon: '📖', color: 'amber', total: 14, watched: 0 },
+        { id: 'math', name: 'Профильная математика', icon: '📐', color: 'violet', total: 14, watched: 0 }
+      ]
+    };
+
+    let appState = loadState();
+    let timerInterval = null;
+    let audioCtx = null;
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const today = new Date().toISOString().slice(0, 10);
+          if (parsed.lastActiveDate !== today) {
+            parsed.sprintsToday = 0;
+            parsed.breakCountToday = 0;
+            parsed.lastActiveDate = today;
+          }
+          return { ...INITIAL_STATE, ...parsed };
+        }
+      } catch (e) {
+        console.warn('Storage parse error, using default state', e);
+      }
+      return { ...INITIAL_STATE };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error('Failed to save state to localStorage', e);
+      }
+    }
+
+    /* Web Audio initialization */
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    /* Request system notification permissions */
+    function requestPushPermission() {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+
+    /* Send system Push Notification and device vibration */
+    function sendPushNotification(title, message) {
+      if ("vibrate" in navigator) {
+        try {
+          navigator.vibrate([250, 100, 250, 100, 400]);
+        } catch (e) {}
+      }
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification(title, {
+            body: message,
+            icon: "https://assets.duolingo.com/favicon.ico",
+            requireInteraction: true
+          });
+        } catch (e) {}
+      }
+    }
+
+    function playChimeStudyDone() {
+      try {
+        initAudioContext();
+        const now = audioCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.12);
+          gain.gain.setValueAtTime(0.18, now + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.6);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.12);
+          osc.stop(now + i * 0.12 + 0.65);
+        });
+      } catch (err) {
+        console.warn('Audio play error', err);
+      }
+    }
+
+    function playChimeBreakDone() {
+      try {
+        initAudioContext();
+        const now = audioCtx.currentTime;
+        const notes = [880, 587.33, 440];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.16);
+          gain.gain.setValueAtTime(0.2, now + i * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.16 + 0.5);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.16);
+          osc.stop(now + i * 0.16 + 0.55);
+        });
+      } catch (err) {
+        console.warn('Audio play error', err);
+      }
+    }
+
+    function updatePetCompanion() {
+      const container = document.getElementById('pet-container');
+      const body = document.getElementById('pet-body');
+      const dialog = document.getElementById('pet-dialog');
+      const glasses = document.getElementById('pet-glasses');
+      const partyHat = document.getElementById('pet-party-hat');
+      const eyesGroup = document.getElementById('pet-eyes');
+      const glow = document.getElementById('pet-glow');
+
+      container.classList.remove('animate-float', 'animate-study', 'animate-dance');
+
+      if (!appState.isRunning) {
+        container.classList.add('animate-float');
+        body.setAttribute('fill', 'url(#bodyGradStudy)');
+        glasses.classList.remove('opacity-0');
+        glasses.classList.add('opacity-100');
+        partyHat.classList.add('opacity-0');
+        glow.className = "absolute w-36 h-36 rounded-full bg-purple-600/10 blur-2xl glow-aura";
+        
+        dialog.textContent = appState.sprintsToday > 0 
+          ? `«Отдыхаем? Готова продолжить в любой момент!»` 
+          : `«Включай Telegram, я на страже фокуса!»`;
+
+        eyesGroup.innerHTML = `
+          <circle cx="58" cy="85" r="7" fill="#0B0F19"/>
+          <circle cx="102" cy="85" r="7" fill="#0B0F19"/>
+          <circle cx="60" cy="82" r="2.5" fill="#FFFFFF"/>
+          <circle cx="104" cy="82" r="2.5" fill="#FFFFFF"/>
+        `;
+      } else if (appState.currentPhase === 'study') {
+        container.classList.add('animate-study');
+        body.setAttribute('fill', 'url(#bodyGradStudy)');
+        glasses.classList.remove('opacity-0');
+        glasses.classList.add('opacity-100');
+        partyHat.classList.add('opacity-0');
+        glow.className = "absolute w-36 h-36 rounded-full bg-indigo-500/30 blur-2xl glow-aura";
+
+        const topic = appState.currentTopic.trim();
+        dialog.textContent = topic 
+          ? `«Слушаем: ${topic.slice(0, 22)}${topic.length > 22 ? '…' : ''}»` 
+          : `«Внимательно конспектируем вебинар!»`;
+
+        eyesGroup.innerHTML = `
+          <circle cx="58" cy="85" r="7.5" fill="#0B0F19"/>
+          <circle cx="102" cy="85" r="7.5" fill="#0B0F19"/>
+          <circle cx="60" cy="81" r="2.8" fill="#FFFFFF"/>
+          <circle cx="104" cy="81" r="2.8" fill="#FFFFFF"/>
+        `;
+      } else {
+        container.classList.add('animate-dance');
+        body.setAttribute('fill', 'url(#bodyGradBreak)');
+        glasses.classList.add('opacity-0');
+        glasses.classList.remove('opacity-100');
+        partyHat.classList.remove('opacity-0');
+        glow.className = "absolute w-36 h-36 rounded-full bg-emerald-500/30 blur-2xl glow-aura";
+
+        dialog.textContent = `«Ура, время разнести Оскара в дуэли! 🦉»`;
+
+        eyesGroup.innerHTML = `
+          <path d="M 50 86 Q 58 78 66 86" stroke="#0B0F19" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+          <path d="M 94 86 Q 102 78 110 86" stroke="#0B0F19" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        `;
+      }
+    }
+
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+      const display = document.getElementById('timer-display');
+      const statusLabel = document.getElementById('timer-status-label');
+      const ring = document.getElementById('timer-progress-ring');
+      const badge = document.getElementById('phase-badge');
+      const subtext = document.getElementById('phase-subtext');
+      const duoCallout = document.getElementById('duo-callout');
+      const btnToggle = document.getElementById('btn-toggle');
+      const btnToggleText = document.getElementById('btn-toggle-text');
+      const btnToggleIcon = document.getElementById('btn-toggle-icon');
+
+      display.textContent = formatTime(appState.timeRemainingSeconds);
+
+      const totalPhaseDuration = (appState.currentPhase === 'study' ? appState.studyDurationMinutes : appState.breakDurationMinutes) * 60;
+      const progressFraction = (totalPhaseDuration - appState.timeRemainingSeconds) / totalPhaseDuration;
+      const circumference = 2 * Math.PI * 52;
+      ring.style.strokeDasharray = `${circumference}`;
+      ring.style.strokeDashoffset = `${circumference * (1 - progressFraction)}`;
+
+      if (appState.currentPhase === 'study') {
+        statusLabel.textContent = "Фокус";
+        statusLabel.className = "text-xs uppercase tracking-wider text-purple-300 font-semibold mt-1";
+        ring.setAttribute('stroke', '#8B5CF6');
+        badge.className = "px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-purple-400 ${appState.isRunning ? 'animate-ping' : ''}"></span>Фокус: Вебинар`;
+        subtext.textContent = "Смотрим блок в Telegram";
+        duoCallout.classList.add('hidden');
+      } else {
+        statusLabel.textContent = "Оскар";
+        statusLabel.className = "text-xs uppercase tracking-wider text-emerald-400 font-semibold mt-1";
+        ring.setAttribute('stroke', '#10B981');
+        badge.className = "px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 ${appState.isRunning ? 'animate-ping' : ''}"></span>Награда: Duolingo`;
+        subtext.textContent = "5 минут игры с Оскаром";
+        duoCallout.classList.remove('hidden');
+      }
+
+      if (appState.isRunning) {
+        btnToggleIcon.textContent = '⏸';
+        btnToggleText.textContent = 'Приостановить';
+        btnToggle.className = "flex-1 min-w-[140px] py-3 px-6 rounded-xl font-bold text-white bg-amber-600 hover:bg-amber-500 active:scale-98 transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2";
+      } else {
+        btnToggleIcon.textContent = '▶';
+        btnToggleText.textContent = appState.timeRemainingSeconds === totalPhaseDuration ? 'Начать спринт' : 'Продолжить';
+        btnToggle.className = "flex-1 min-w-[140px] py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-98 transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2";
+      }
+
+      document.getElementById('sprints-today-count').textContent = appState.sprintsToday;
+      document.getElementById('minutes-today-count').textContent = appState.sprintsToday * appState.studyDurationMinutes;
+
+      updatePetCompanion();
+    }
+
+    function toggleTimer() {
+      initAudioContext();
+      requestPushPermission();
+      if (appState.isRunning) {
+        clearInterval(timerInterval);
+        appState.isRunning = false;
+      } else {
+        appState.isRunning = true;
+        timerInterval = setInterval(tick, 1000);
+      }
+      saveState();
+      updateTimerUI();
+    }
+
+    function tick() {
+      if (appState.timeRemainingSeconds > 0) {
+        appState.timeRemainingSeconds--;
+        updateTimerUI();
+      } else {
+        handlePhaseCompletion();
+      }
+    }
+
+    function handlePhaseCompletion() {
+      clearInterval(timerInterval);
+      appState.isRunning = false;
+
+      if (appState.currentPhase === 'study') {
+        playChimeStudyDone();
+        sendPushNotification("Время вышло! Оскар ждёт 🦉", "Спринт окончен. Пора сделать перерыв и сыграть дуэль в Duolingo!");
+        appState.sprintsToday++;
+        appState.currentPhase = 'break';
+        appState.timeRemainingSeconds = appState.breakDurationMinutes * 60;
+      } else {
+        playChimeBreakDone();
+        sendPushNotification("Перерыв окончен! 🎓", "Партия завершена. Возвращаемся к вебинару в Telegram!");
+        appState.breakCountToday++;
+        appState.currentPhase = 'study';
+        appState.timeRemainingSeconds = appState.studyDurationMinutes * 60;
+      }
+
+      saveState();
+      updateTimerUI();
+    }
+
+    function skipPhase() {
+      initAudioContext();
+      requestPushPermission();
+      clearInterval(timerInterval);
+      appState.isRunning = false;
+      if (appState.currentPhase === 'study') {
+        appState.currentPhase = 'break';
+        appState.timeRemainingSeconds = appState.breakDurationMinutes * 60;
+      } else {
+        appState.currentPhase = 'study';
+        appState.timeRemainingSeconds = appState.studyDurationMinutes * 60;
+      }
+      saveState();
+      updateTimerUI();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      appState.isRunning = false;
+      const baseMinutes = (appState.currentPhase === 'study') ? appState.studyDurationMinutes : appState.breakDurationMinutes;
+      appState.timeRemainingSeconds = baseMinutes * 60;
+      saveState();
+      updateTimerUI();
+    }
+
+    function setStudyDuration(minutes) {
+      appState.studyDurationMinutes = minutes;
+      const btn20 = document.getElementById('btn-mode-20');
+      const btn15 = document.getElementById('btn-mode-15');
+
+      if (minutes === 20) {
+        btn20.className = "px-2.5 py-1 rounded-lg font-medium transition bg-purple-600 text-white shadow";
+        btn15.className = "px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition";
+      } else {
+        btn15.className = "px-2.5 py-1 rounded-lg font-medium transition bg-purple-600 text-white shadow";
+        btn20.className = "px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition";
+      }
+
+      if (appState.currentPhase === 'study' && !appState.isRunning) {
+        appState.timeRemainingSeconds = minutes * 60;
+      }
+      saveState();
+      updateTimerUI();
+    }
+
+    function updateSubject(id, delta) {
+      const sub = appState.subjects.find(s => s.id === id);
+      if (!sub) return;
+
+      const nextVal = sub.watched + delta;
+      if (nextVal >= 0 && nextVal <= sub.total) {
+        sub.watched = nextVal;
+        saveState();
+        renderSubjects();
+        renderCalculations();
+      }
+    }
+
+    function renderSubjects() {
+      const container = document.getElementById('subjects-container');
+      container.innerHTML = '';
+
+      let totalWatched = 0;
+      let totalAll = 0;
+
+      const colorMap = {
+        emerald: { bar: 'bg-emerald-500' },
+        cyan: { bar: 'bg-cyan-500' },
+        amber: { bar: 'bg-amber-500' },
+        violet: { bar: 'bg-violet-500' }
+      };
+
+      appState.subjects.forEach(sub => {
+        totalWatched += sub.watched;
+        totalAll += sub.total;
+
+        const percent = Math.round((sub.watched / sub.total) * 100);
+        const col = colorMap[sub.color] || colorMap.violet;
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 hover:border-slate-700 transition flex flex-col gap-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-lg">${sub.icon}</span>
+              <div>
+                <h4 class="text-sm font-semibold text-slate-200">${sub.name}</h4>
+                <div class="text-[11px] text-slate-400">Осталось: <span class="font-bold text-slate-300">${sub.total - sub.watched}</span> из ${sub.total}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button onclick="updateSubject('${sub.id}', -1)" title="Уменьшить" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm active:scale-90 transition">
+                -
+              </button>
+              <span class="font-mono font-bold text-sm px-2 text-white min-w-[28px] text-center">
+                ${sub.watched}
+              </span>
+              <button onclick="updateSubject('${sub.id}', 1)" title="Отметить +1 вебинар" class="w-7 h-7 rounded-lg bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center font-bold text-sm active:scale-90 transition shadow">
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-1 border border-slate-800/80">
+            <div class="${col.bar} h-full transition-all duration-300" style="width: ${percent}%"></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      const overallPercent = Math.round((totalWatched / totalAll) * 100);
+      document.getElementById('overall-fraction').textContent = `${totalWatched} / ${totalAll} (${overallPercent}%)`;
+      document.getElementById('overall-progress-bar').style.width = `${overallPercent}%`;
+    }
+
+    function renderCalculations() {
+      const now = new Date();
+      const diffMs = DEADLINE_DATE.getTime() - now.getTime();
+      const daysLeft = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+      document.getElementById('header-days-left').textContent = `${daysLeft} дн.`;
+      document.getElementById('calc-days').textContent = `${daysLeft} дн.`;
+
+      let totalWatched = 0;
+      let totalGoal = 0;
+      appState.subjects.forEach(s => {
+        totalWatched += s.watched;
+        totalGoal += s.total;
+      });
+
+      const totalLeft = totalGoal - totalWatched;
+      document.getElementById('calc-total-left').textContent = `${totalLeft}`;
+
+      const dailyTarget = (totalLeft / daysLeft).toFixed(1);
+      document.getElementById('calc-daily-target').textContent = `~${dailyTarget}`;
+    }
+
+    function openDaySummaryModal() {
+      const modal = document.getElementById('summary-modal');
+      let totalWatched = 0;
+      let totalGoal = 0;
+      appState.subjects.forEach(s => {
+        totalWatched += s.watched;
+        totalGoal += s.total;
+      });
+
+      document.getElementById('modal-sprints').textContent = appState.sprintsToday;
+      document.getElementById('modal-minutes').textContent = `${appState.sprintsToday * appState.studyDurationMinutes} мин`;
+      document.getElementById('modal-duo').textContent = appState.breakCountToday;
+      document.getElementById('modal-total-webinars').textContent = `${totalWatched} / ${totalGoal}`;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeDaySummaryModal() {
+      document.getElementById('summary-modal').classList.add('hidden');
+    }
+
+    function confirmResetAll() {
+      const isConfirmed = window.confirm("Сбросить весь прогресс и счетчики вебинаров?");
+      if (isConfirmed) {
+        localStorage.removeItem(STORAGE_KEY);
+        appState = { ...INITIAL_STATE };
+        clearInterval(timerInterval);
+        appState.isRunning = false;
+        renderSubjects();
+        renderCalculations();
+        updateTimerUI();
+      }
+    }
+
+    window.onload = function() {
+      const topicInput = document.getElementById('topic-input');
+      topicInput.value = appState.currentTopic || '';
+      topicInput.addEventListener('input', (e) => {
+        appState.currentTopic = e.target.value;
+        saveState();
+        updatePetCompanion();
+      });
+
+      setStudyDuration(appState.studyDurationMinutes);
+      renderSubjects();
+      renderCalculations();
+      updateTimerUI();
+    };
+  </script>
+</body>
+</html>
